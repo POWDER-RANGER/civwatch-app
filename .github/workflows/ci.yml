@@ -10,14 +10,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install libsecret (flutter_secure_storage on Linux)
+      - name: Install libsecret
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev libsecret-1-0
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: Generate platform trees
-        run: flutter create . --project-name civwatch_app --platforms=android,ios,linux,windows,macos
+      - run: flutter create . --project-name civwatch_app --platforms=android,ios,linux,windows,macos
+      - name: Wire Android network security config
+        run: |
+          mkdir -p android/app/src/main/res/xml
+          if ! grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml; then
+            sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/' android/app/src/main/AndroidManifest.xml
+          fi
+          grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml
+          grep -q 'activity' android/app/src/main/AndroidManifest.xml
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
@@ -50,6 +57,12 @@ jobs:
           channel: stable
           cache: true
       - run: flutter create . --project-name civwatch_app --platforms=android
+      - name: Wire cleartext policy
+        run: |
+          if ! grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml; then
+            sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/' android/app/src/main/AndroidManifest.xml
+          fi
+          grep -q 'activity' android/app/src/main/AndroidManifest.xml
       - run: flutter pub get
       - run: flutter build apk --release
 

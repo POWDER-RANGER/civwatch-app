@@ -47,6 +47,7 @@ class TitanApi {
     final r = await _client
         .get(_u('/api/telemetry/recent').replace(queryParameters: q), headers: AppSettings.instance.authHeaders())
         .timeout(const Duration(seconds: 10));
+    if (r.statusCode != 200) throw Exception('recent ${r.statusCode}');
     final body = jsonDecode(r.body) as Map<String, dynamic>;
     final list = (body['samples'] as List?) ?? [];
     return list.map((e) => RfSample.fromJson(e as Map<String, dynamic>)).toList();
@@ -61,6 +62,7 @@ class TitanApi {
 
   Future<Map<String, dynamic>> verifyEvidence() async {
     final r = await _get('/api/evidence/verify');
+    if (r.statusCode != 200) throw Exception('verify ${r.statusCode}');
     return jsonDecode(r.body) as Map<String, dynamic>;
   }
 
@@ -69,6 +71,7 @@ class TitanApi {
         .get(_u('/api/evidence/tail').replace(queryParameters: {'n': '$n'}),
             headers: AppSettings.instance.authHeaders())
         .timeout(const Duration(seconds: 10));
+    if (r.statusCode != 200) throw Exception('tail ${r.statusCode}');
     final body = jsonDecode(r.body) as Map<String, dynamic>;
     return ((body['records'] as List?) ?? []).cast<Map<String, dynamic>>();
   }
@@ -79,13 +82,19 @@ class TitanApi {
   }
 
   void _openWs() {
-    disconnectLive(reconnect: false);
+    _reconnectTimer?.cancel();
+    _wsSub?.cancel();
+    _wsSub = null;
+    try {
+      _ws?.sink.close();
+    } catch (_) {}
+    _ws = null;
+
     final base = AppSettings.instance.titanBase;
-    final ws = base.startsWith('https')
+    final wsScheme = base.startsWith('https')
         ? base.replaceFirst('https', 'wss')
         : base.replaceFirst('http', 'ws');
-    // Never put the token in the URL (logs / proxies / history).
-    final uri = Uri.parse('$ws/ws/live');
+    final uri = Uri.parse('$wsScheme/ws/live');
     try {
       _ws = WebSocketChannel.connect(uri);
       final token = AppSettings.instance.apiToken;
@@ -95,16 +104,18 @@ class TitanApi {
       _wsSub = _ws!.stream.listen(
         (msg) {
           _backoffSec = 1;
-          _connController.add(true);
           try {
-            _liveController.add(jsonDecode('$msg') as Map<String, dynamic>);
+            final data = jsonDecode('$msg') as Map<String, dynamic>;
+            if (data['type'] == 'hello') {
+              _connController.add(true);
+            }
+            _liveController.add(data);
           } catch (_) {}
         },
         onError: (_) => _scheduleReconnect(),
         onDone: () => _scheduleReconnect(),
         cancelOnError: false,
       );
-      _connController.add(true);
     } catch (_) {
       _scheduleReconnect();
     }
@@ -121,12 +132,16 @@ class TitanApi {
     });
   }
 
-  void disconnectLive({bool reconnect = true}) {
-    if (!reconnect) _wantLive = false;
+  void disconnectLive({bool reconnect = false}) {
+    if (!reconnect) {
+      _wantLive = false;
+    }
     _reconnectTimer?.cancel();
     _wsSub?.cancel();
     _wsSub = null;
-    _ws?.sink.close();
+    try {
+      _ws?.sink.close();
+    } catch (_) {}
     _ws = null;
     _connController.add(false);
   }

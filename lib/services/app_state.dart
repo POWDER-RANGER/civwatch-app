@@ -14,11 +14,13 @@ class AppState extends ChangeNotifier {
       liveConnected = up;
       notifyListeners();
     });
+    _liveSub = this.titan.liveEvents.listen(_onLiveEvent);
   }
 
   final TitanApi titan;
   final CivintApi civint;
   StreamSubscription? _connSub;
+  StreamSubscription? _liveSub;
 
   TitanHealth? health;
   List<RfSample> samples = [];
@@ -32,6 +34,19 @@ class AppState extends ChangeNotifier {
   bool loading = false;
   bool liveConnected = false;
 
+  void _onLiveEvent(Map<String, dynamic> ev) {
+    liveLog.insert(0, ev);
+    if (liveLog.length > 40) liveLog = liveLog.sublist(0, 40);
+    if (ev['type'] == 'telemetry') {
+      final s = ev['sample'];
+      if (s is Map<String, dynamic>) {
+        samples.insert(0, RfSample.fromJson(s));
+        if (samples.length > 80) samples = samples.sublist(0, 80);
+      }
+    }
+    notifyListeners();
+  }
+
   Future<void> bootstrap() async {
     loading = true;
     error = null;
@@ -39,7 +54,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     try {
       await Future.wait([refreshTitan(), refreshCivint()]);
-      connectLive();
+      titan.connectLive();
     } catch (e) {
       error = '$e';
     } finally {
@@ -73,24 +88,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void connectLive() {
-    titan.disconnectLive(reconnect: false);
-    titan.connectLive();
-    titan.liveEvents.listen((ev) {
-      liveLog.insert(0, ev);
-      if (liveLog.length > 40) liveLog = liveLog.sublist(0, 40);
-      if (ev['type'] == 'telemetry') {
-        final s = ev['sample'];
-        if (s is Map<String, dynamic>) {
-          samples.insert(0, RfSample.fromJson(s));
-          if (samples.length > 80) samples = samples.sublist(0, 80);
-        }
-      }
-      notifyListeners();
-    });
-    notifyListeners();
-  }
-
   Future<void> emitDemo() async {
     await titan.emitDemo(count: 4);
     await refreshTitan();
@@ -101,6 +98,7 @@ class AppState extends ChangeNotifier {
   @override
   void dispose() {
     _connSub?.cancel();
+    _liveSub?.cancel();
     titan.dispose();
     civint.dispose();
     super.dispose();
