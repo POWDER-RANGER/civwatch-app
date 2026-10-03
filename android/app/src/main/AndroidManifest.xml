@@ -1,0 +1,8 @@
+<!-- After `flutter create . --platforms=android`, merge networkSecurityConfig into the real manifest. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <application
+      android:label="CIVWATCH"
+      android:networkSecurityConfig="@xml/network_security_config"
+      android:usesCleartextTraffic="false"/>
+</manifest>

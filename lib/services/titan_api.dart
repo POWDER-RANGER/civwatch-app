@@ -84,12 +84,14 @@ class TitanApi {
     final ws = base.startsWith('https')
         ? base.replaceFirst('https', 'wss')
         : base.replaceFirst('http', 'ws');
-    final token = AppSettings.instance.apiToken;
-    final uri = Uri.parse('$ws/ws/live').replace(
-      queryParameters: token.isEmpty ? null : {'token': token},
-    );
+    // Never put the token in the URL (logs / proxies / history).
+    final uri = Uri.parse('$ws/ws/live');
     try {
       _ws = WebSocketChannel.connect(uri);
+      final token = AppSettings.instance.apiToken;
+      if (token.isNotEmpty) {
+        _ws!.sink.add(jsonEncode({'type': 'auth', 'token': token}));
+      }
       _wsSub = _ws!.stream.listen(
         (msg) {
           _backoffSec = 1;

@@ -2,22 +2,20 @@
 
 Multi-platform **client** for CIVINTELLIGENCE + Cell Titan (Flutter: Android, iOS, Windows, Linux).
 
-> **Status:** scaffold + API wiring. Not a certified multi-platform release until CI builds pass.  
-> **Network policy:** Titan access is **localhost / emulator only** until Titan has a token **and** TLS (or VPN). Do not point a physical phone at `http://<LAN-IP>:8000` on an open LAN.
+> **Status:** scaffold until GitHub Actions builds are green.  
+> **Network policy:** Titan is **localhost / emulator only** until token **and** TLS or VPN. No open-LAN phone access.
 
-## Pair with Titan v0.1.2+
+## Pair with Titan ≥ 0.1.2
 
 ```bash
-# Terminal 1 — loopback only
 cd civwatch-cell-titan
-export TITAN_API_TOKEN=...   # optional on pure localhost
-./launch.sh                  # HOST=127.0.0.1
+export TITAN_API_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+./launch.sh   # 127.0.0.1 only
 
-# Terminal 2
 cd civwatch-app
 flutter create . --platforms=android,ios,windows,linux,macos
 flutter pub get
-flutter run -d windows   # or linux / chrome / android emulator
+flutter run -d linux   # or windows / android emulator
 ```
 
 | Client | Titan URL |
@@ -25,13 +23,17 @@ flutter run -d windows   # or linux / chrome / android emulator
 | Desktop | `http://127.0.0.1:8000` |
 | Android emulator | `http://10.0.2.2:8000` |
 | iOS simulator | `http://127.0.0.1:8000` |
-| Physical phone | **Not supported** without HTTPS/VPN + token |
+| Physical phone | **Unsupported** without HTTPS/VPN |
 
-Settings stores the **API token** in platform secure storage (`flutter_secure_storage`), not SharedPreferences.
+- API token → **Settings** → stored with `flutter_secure_storage`
+- WebSocket auth → first JSON message `{"type":"auth","token":"..."}` (never in the URL)
+- Android cleartext allowed **only** for `127.0.0.1`, `localhost`, `10.0.2.2` (see `network_security_config.xml`)
+- iOS: merge `ios/Runner/Info.plist.snippet` ATS exceptions for localhost after `flutter create`
+- **Linux:** install `libsecret-1` for secure storage (`sudo apt install libsecret-1-0 libsecret-1-dev`)
 
 ## CI
 
-GitHub Actions: `flutter analyze` + `flutter test` after `flutter create` generates platform trees.
+Workflow runs `flutter create .`, then analyze, test, and release builds for Linux, Windows, and Android.
 
 ## License
 

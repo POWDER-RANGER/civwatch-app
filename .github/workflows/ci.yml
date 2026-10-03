@@ -6,14 +6,62 @@ on:
   pull_request:
 
 jobs:
-  analyze:
+  analyze-test:
     runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install libsecret (flutter_secure_storage on Linux)
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev libsecret-1-0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate platform trees
+        run: flutter create . --project-name civwatch_app --platforms=android,ios,linux,windows,macos
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  build-linux:
+    needs: analyze-test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter create . --project-name civwatch_app --platforms=linux
+      - run: flutter pub get
+      - run: flutter build linux --release
+
+  build-android:
+    needs: analyze-test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter create . --project-name civwatch_app --platforms=android
+      - run: flutter pub get
+      - run: flutter build apk --release
+
+  build-windows:
+    needs: analyze-test
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: flutter create . --platforms=android,ios,linux --project-name civwatch_app
+          cache: true
+      - run: flutter create . --project-name civwatch_app --platforms=windows
       - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
+      - run: flutter build windows --release
