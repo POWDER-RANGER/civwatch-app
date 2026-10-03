@@ -14,18 +14,21 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late final TextEditingController _titan;
   late final TextEditingController _civint;
+  late final TextEditingController _token;
 
   @override
   void initState() {
     super.initState();
     _titan = TextEditingController(text: AppSettings.instance.titanBase);
     _civint = TextEditingController(text: AppSettings.instance.civintBase);
+    _token = TextEditingController(text: AppSettings.instance.apiToken);
   }
 
   @override
   void dispose() {
     _titan.dispose();
     _civint.dispose();
+    _token.dispose();
     super.dispose();
   }
 
@@ -37,10 +40,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          const Text(
+            'Supported without TLS: localhost and emulator only. '
+            'Do not bind Titan to LAN for a physical phone.',
+            style: TextStyle(fontSize: 12, color: Color(0xFFD29922)),
+          ),
+          const SizedBox(height: 16),
           const Text('Cell Titan base URL', style: TextStyle(fontSize: 12, color: Color(0xFF8B949E))),
           TextField(
             controller: _titan,
             decoration: const InputDecoration(hintText: 'http://127.0.0.1:8000'),
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 16),
+          const Text('Titan API token (secure storage)', style: TextStyle(fontSize: 12, color: Color(0xFF8B949E))),
+          TextField(
+            controller: _token,
+            obscureText: true,
+            decoration: const InputDecoration(hintText: 'Bearer token from TITAN_API_TOKEN'),
             style: const TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 16),
@@ -53,7 +70,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 20),
           FilledButton(
             onPressed: () async {
-              await AppSettings.instance.save(titan: _titan.text, civint: _civint.text);
+              await AppSettings.instance.save(
+                titan: _titan.text,
+                civint: _civint.text,
+                token: _token.text,
+              );
               if (context.mounted) {
                 await context.read<AppState>().bootstrap();
                 Navigator.pop(context);
@@ -63,10 +84,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 24),
           const Text(
-            'Android emulator → Titan on host: http://10.0.2.2:8000\n'
+            'Desktop → http://127.0.0.1:8000\n'
+            'Android emulator → http://10.0.2.2:8000\n'
             'iOS simulator → http://127.0.0.1:8000\n'
-            'Physical device → use your LAN IP.\n'
-            'Windows / Linux desktop → http://127.0.0.1:8000',
+            'Physical phone → use Tailscale/HTTPS only, never open LAN HTTP',
             style: TextStyle(fontSize: 12, color: Color(0xFF8B949E)),
           ),
         ],

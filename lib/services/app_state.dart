@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../models/models.dart';
@@ -7,10 +9,16 @@ import 'titan_api.dart';
 class AppState extends ChangeNotifier {
   AppState({TitanApi? titan, CivintApi? civint})
       : titan = titan ?? TitanApi(),
-        civint = civint ?? CivintApi();
+        civint = civint ?? CivintApi() {
+    _connSub = this.titan.connectionState.listen((up) {
+      liveConnected = up;
+      notifyListeners();
+    });
+  }
 
   final TitanApi titan;
   final CivintApi civint;
+  StreamSubscription? _connSub;
 
   TitanHealth? health;
   List<RfSample> samples = [];
@@ -20,12 +28,14 @@ class AppState extends ChangeNotifier {
   List<AlprPoint> alpr = [];
   List<Map<String, dynamic>> liveLog = [];
   String? error;
+  String? civintError;
   bool loading = false;
   bool liveConnected = false;
 
   Future<void> bootstrap() async {
     loading = true;
     error = null;
+    civintError = null;
     notifyListeners();
     try {
       await Future.wait([refreshTitan(), refreshCivint()]);
@@ -56,17 +66,19 @@ class AppState extends ChangeNotifier {
       alerts = await civint.alerts();
       awards = await civint.awards();
       alpr = await civint.alpr();
-    } catch (_) {}
+      civintError = null;
+    } catch (e) {
+      civintError = 'CIVINT feeds: $e';
+    }
     notifyListeners();
   }
 
   void connectLive() {
-    titan.disconnectLive();
+    titan.disconnectLive(reconnect: false);
     titan.connectLive();
-    liveConnected = true;
     titan.liveEvents.listen((ev) {
       liveLog.insert(0, ev);
-      if (liveLog.length > 80) liveLog = liveLog.sublist(0, 80);
+      if (liveLog.length > 40) liveLog = liveLog.sublist(0, 40);
       if (ev['type'] == 'telemetry') {
         final s = ev['sample'];
         if (s is Map<String, dynamic>) {
@@ -88,6 +100,7 @@ class AppState extends ChangeNotifier {
 
   @override
   void dispose() {
+    _connSub?.cancel();
     titan.dispose();
     civint.dispose();
     super.dispose();
