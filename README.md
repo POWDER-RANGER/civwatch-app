@@ -31,6 +31,10 @@ flutter run -d linux   # or windows / android emulator
 - iOS: merge `ios/Runner/Info.plist.snippet` ATS exceptions for localhost after `flutter create`
 - **Linux:** install `libsecret-1` for secure storage (`sudo apt install libsecret-1-0 libsecret-1-dev`)
 
+## Integration
+
+The app treats CivilianIntelligence as the hub, Watchtower as the map/oversight pillar, and Cell Titan as the defensive RF pillar. Service endpoints are stored locally; HTTP is accepted only for localhost/emulator endpoints, while remote endpoints must use HTTPS.
+
 ## CI
 
 Workflow runs `flutter create .`, then analyze, test, and release builds for Linux, Windows, and Android.
