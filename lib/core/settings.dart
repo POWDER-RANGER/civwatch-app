@@ -25,9 +25,12 @@ class AppSettings {
 
   Future<void> load() async {
     final p = await SharedPreferences.getInstance();
-    titanBase = p.getString(_kTitan) ?? titanBase;
-    civintBase = p.getString(_kCivint) ?? civintBase;
-    watchtowerBase = p.getString(_kWatchtower) ?? watchtowerBase;
+    final savedTitan = p.getString(_kTitan);
+    final savedCivint = p.getString(_kCivint);
+    final savedWatchtower = p.getString(_kWatchtower);
+    if (savedTitan != null && _isAllowedServiceUrl(savedTitan)) titanBase = savedTitan;
+    if (savedCivint != null && _isAllowedServiceUrl(savedCivint)) civintBase = savedCivint;
+    if (savedWatchtower != null && _isAllowedServiceUrl(savedWatchtower)) watchtowerBase = savedWatchtower;
     apiToken = await _secure.read(key: _kToken) ?? '';
   }
 
@@ -70,7 +73,7 @@ class AppSettings {
     }
   }
 
-  static void _validateServiceUrl(String value, {required String label}) {
+  static bool _isAllowedServiceUrl(String value) {
     final uri = Uri.tryParse(value);
     final host = uri?.host.toLowerCase();
     final loopback = host == 'localhost' ||
@@ -79,8 +82,16 @@ class AppSettings {
         host == '10.0.2.2';
     final https = uri?.scheme == 'https';
     final httpLocal = uri?.scheme == 'http' && loopback;
+    return uri != null &&
+        host != null &&
+        uri.userInfo.isEmpty &&
+        uri.query.isEmpty &&
+        uri.fragment.isEmpty &&
+        (https || httpLocal);
+  }
 
-    if (uri == null || host == null || (!https && !httpLocal)) {
+  static void _validateServiceUrl(String value, {required String label}) {
+    if (!_isAllowedServiceUrl(value)) {
       throw ArgumentError(
         '$label endpoint must use HTTPS, or HTTP on localhost/emulator only',
       );
