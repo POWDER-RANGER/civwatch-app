@@ -144,8 +144,8 @@ class WatchtowerHealth {
   final String version;
 
   factory WatchtowerHealth.fromJson(Map<String, dynamic> j) => WatchtowerHealth(
-        status: '\${j['status'] ?? 'unknown'}',
-        db: '\${j['db'] ?? 'unknown'}',
-        version: '\${j['version'] ?? ''}',
+        status: '${j['status'] ?? 'unknown'}',
+        db: '${j['db'] ?? 'unknown'}',
+        version: '${j['version'] ?? ''}',
       );
 }
