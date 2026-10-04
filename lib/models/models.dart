@@ -131,3 +131,21 @@ class AlprPoint {
     );
   }
 }
+
+class WatchtowerHealth {
+  WatchtowerHealth({
+    required this.status,
+    required this.db,
+    required this.version,
+  });
+
+  final String status;
+  final String db;
+  final String version;
+
+  factory WatchtowerHealth.fromJson(Map<String, dynamic> j) => WatchtowerHealth(
+        status: '${j['status'] ?? 'unknown'}',
+        db: '${j['db'] ?? 'unknown'}',
+        version: '${j['version'] ?? ''}',
+      );
+}

@@ -1,43 +1,68 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Operator-configurable endpoints + Titan bearer token.
+/// Operator-configurable service endpoints + Titan bearer token.
 ///
-/// URLs live in SharedPreferences. The API token uses
-/// [FlutterSecureStorage] (Keychain / Keystore / libsecret).
+/// Service URLs live in SharedPreferences. The API token uses
+/// FlutterSecureStorage (Keychain / Keystore / libsecret).
 class AppSettings {
   AppSettings._();
   static final AppSettings instance = AppSettings._();
 
   static const _kTitan = 'titan_base_url';
   static const _kCivint = 'civint_base_url';
+  static const _kWatchtower = 'watchtower_base_url';
   static const _kToken = 'titan_api_token';
 
   final _secure = const FlutterSecureStorage();
 
-  /// Prefer loopback. Physical-phone LAN is unsupported without TLS + token.
+  /// Prefer loopback. Physical-phone LAN HTTP is unsupported.
   String titanBase = 'http://127.0.0.1:8000';
   String civintBase =
       'https://raw.githubusercontent.com/POWDER-RANGER/CivilianIntelligence/main/public/civint';
+  String watchtowerBase = 'http://127.0.0.1:3000';
   String apiToken = '';
 
   Future<void> load() async {
     final p = await SharedPreferences.getInstance();
-    titanBase = p.getString(_kTitan) ?? titanBase;
-    civintBase = p.getString(_kCivint) ?? civintBase;
+    final savedTitan = p.getString(_kTitan);
+    final savedCivint = p.getString(_kCivint);
+    final savedWatchtower = p.getString(_kWatchtower);
+    if (savedTitan != null && _isAllowedServiceUrl(savedTitan)) titanBase = savedTitan;
+    if (savedCivint != null && _isAllowedServiceUrl(savedCivint)) civintBase = savedCivint;
+    if (savedWatchtower != null && _isAllowedServiceUrl(savedWatchtower)) watchtowerBase = savedWatchtower;
     apiToken = await _secure.read(key: _kToken) ?? '';
   }
 
-  Future<void> save({String? titan, String? civint, String? token}) async {
+  Future<void> save({
+    String? titan,
+    String? civint,
+    String? watchtower,
+    String? token,
+  }) async {
     final p = await SharedPreferences.getInstance();
+
     if (titan != null) {
-      titanBase = titan.trim().replaceAll(RegExp(r'/$'), '');
+      final value = titan.trim().replaceAll(RegExp(r'/$'), '');
+      _validateServiceUrl(value, label: 'Titan');
+      titanBase = value;
       await p.setString(_kTitan, titanBase);
     }
+
     if (civint != null) {
-      civintBase = civint.trim().replaceAll(RegExp(r'/$'), '');
+      final value = civint.trim().replaceAll(RegExp(r'/$'), '');
+      _validateServiceUrl(value, label: 'CIVINT');
+      civintBase = value;
       await p.setString(_kCivint, civintBase);
     }
+
+    if (watchtower != null) {
+      final value = watchtower.trim().replaceAll(RegExp(r'/$'), '');
+      _validateServiceUrl(value, label: 'Watchtower');
+      watchtowerBase = value;
+      await p.setString(_kWatchtower, watchtowerBase);
+    }
+
     if (token != null) {
       apiToken = token.trim();
       if (apiToken.isEmpty) {
@@ -45,6 +70,31 @@ class AppSettings {
       } else {
         await _secure.write(key: _kToken, value: apiToken);
       }
+    }
+  }
+
+  static bool _isAllowedServiceUrl(String value) {
+    final uri = Uri.tryParse(value);
+    final host = uri?.host.toLowerCase();
+    final loopback = host == 'localhost' ||
+        host == '127.0.0.1' ||
+        host == '::1' ||
+        host == '10.0.2.2';
+    final https = uri?.scheme == 'https';
+    final httpLocal = uri?.scheme == 'http' && loopback;
+    return uri != null &&
+        host != null &&
+        uri.userInfo.isEmpty &&
+        uri.query.isEmpty &&
+        uri.fragment.isEmpty &&
+        (https || httpLocal);
+  }
+
+  static void _validateServiceUrl(String value, {required String label}) {
+    if (!_isAllowedServiceUrl(value)) {
+      throw ArgumentError(
+        '$label endpoint must use HTTPS, or HTTP on localhost/emulator only',
+      );
     }
   }
 

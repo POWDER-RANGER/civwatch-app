@@ -14,6 +14,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late final TextEditingController _titan;
   late final TextEditingController _civint;
+  late final TextEditingController _watchtower;
   late final TextEditingController _token;
 
   @override
@@ -21,6 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _titan = TextEditingController(text: AppSettings.instance.titanBase);
     _civint = TextEditingController(text: AppSettings.instance.civintBase);
+    _watchtower = TextEditingController(text: AppSettings.instance.watchtowerBase);
     _token = TextEditingController(text: AppSettings.instance.apiToken);
   }
 
@@ -28,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void dispose() {
     _titan.dispose();
     _civint.dispose();
+    _watchtower.dispose();
     _token.dispose();
     super.dispose();
   }
@@ -67,12 +70,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             decoration: const InputDecoration(hintText: 'https://.../public/civint'),
             style: const TextStyle(fontSize: 14),
           ),
+
+          const Text('Watchtower base URL', style: TextStyle(fontSize: 12, color: Color(0xFF8B949E))),
+          TextField(
+            controller: _watchtower,
+            decoration: const InputDecoration(hintText: 'http://127.0.0.1:3000'),
+            style: const TextStyle(fontSize: 14),
+          ),
           const SizedBox(height: 20),
           FilledButton(
             onPressed: () async {
               await AppSettings.instance.save(
                 titan: _titan.text,
                 civint: _civint.text,
+                watchtower: _watchtower.text,
                 token: _token.text,
               );
               if (context.mounted) {

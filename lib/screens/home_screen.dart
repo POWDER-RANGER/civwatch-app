@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final h = state.health;
+    final w = state.watchtowerHealth;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D1117),
@@ -78,17 +79,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 MetricTile(
                     label: 'Evidence', value: h == null ? '—' : '${h.evidenceLength}', ok: h?.evidenceOk),
                 const SizedBox(width: 8),
-                MetricTile(label: 'Alerts', value: '${state.alerts.length}'),
+                MetricTile(label: 'Watchtower', value: w?.status ?? '—', ok: w?.status == 'ok'),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
+                MetricTile(label: 'Alerts', value: '${state.alerts.length}'),
+                const SizedBox(width: 8),
                 MetricTile(label: 'Awards', value: '${state.awards.length}'),
                 const SizedBox(width: 8),
                 MetricTile(label: 'ALPR pts', value: '${state.alpr.length}'),
-                const SizedBox(width: 8),
-                MetricTile(label: 'Live', value: state.liveConnected ? 'on' : 'off', ok: state.liveConnected),
               ],
             ),
             const SizedBox(height: 20),
@@ -100,6 +101,13 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.visibility_outlined,
               color: const Color(0xFF00E5FF),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VeilScreen())),
+            ),
+            DeskCard(
+              title: 'Watchtower',
+              subtitle: 'Map oversight · ' + state.watchtowerFeatures.toString() + ' features',
+              icon: Icons.map_outlined,
+              color: const Color(0xFF58A6FF),
+              onTap: () => _openWatchtower(context, state),
             ),
             DeskCard(
               title: 'Cell Titan',
@@ -140,4 +148,24 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  void _openWatchtower(BuildContext context, AppState state) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Watchtower'),
+        content: Text(
+          state.watchtowerHealth == null
+              ? (state.watchtowerError ?? 'Watchtower is not configured.')
+              : 'Status: ' + state.watchtowerHealth!.status + '\n'
+                'Database: ' + state.watchtowerHealth!.db + '\n'
+                'Version: ' + state.watchtowerHealth!.version + '\n'
+                'Map features: ' + state.watchtowerFeatures.toString(),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+        ],
+      ),
+    );
+  }
+
 }

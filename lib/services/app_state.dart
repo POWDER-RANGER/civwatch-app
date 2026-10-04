@@ -5,11 +5,13 @@ import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import 'civint_api.dart';
 import 'titan_api.dart';
+import 'watchtower_api.dart';
 
 class AppState extends ChangeNotifier {
-  AppState({TitanApi? titan, CivintApi? civint})
+  AppState({TitanApi? titan, CivintApi? civint, WatchtowerApi? watchtower})
       : titan = titan ?? TitanApi(),
-        civint = civint ?? CivintApi() {
+        civint = civint ?? CivintApi(),
+        watchtower = watchtower ?? WatchtowerApi() {
     _connSub = this.titan.connectionState.listen((up) {
       liveConnected = up;
       notifyListeners();
@@ -19,6 +21,7 @@ class AppState extends ChangeNotifier {
 
   final TitanApi titan;
   final CivintApi civint;
+  final WatchtowerApi watchtower;
   StreamSubscription? _connSub;
   StreamSubscription? _liveSub;
 
@@ -33,6 +36,9 @@ class AppState extends ChangeNotifier {
   String? civintError;
   bool loading = false;
   bool liveConnected = false;
+  WatchtowerHealth? watchtowerHealth;
+  int watchtowerFeatures = 0;
+  String? watchtowerError;
 
   void _onLiveEvent(Map<String, dynamic> ev) {
     liveLog.insert(0, ev);
@@ -53,7 +59,7 @@ class AppState extends ChangeNotifier {
     civintError = null;
     notifyListeners();
     try {
-      await Future.wait([refreshTitan(), refreshCivint()]);
+      await Future.wait([refreshTitan(), refreshCivint(), refreshWatchtower()]);
       titan.connectLive();
     } catch (e) {
       error = '$e';
@@ -88,6 +94,19 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refreshWatchtower() async {
+    try {
+      watchtowerHealth = await watchtower.health();
+      watchtowerFeatures = await watchtower.featureCount();
+      watchtowerError = null;
+    } catch (e) {
+      watchtowerHealth = null;
+      watchtowerFeatures = 0;
+      watchtowerError = 'Watchtower unreachable: $e';
+    }
+    notifyListeners();
+  }
+
   Future<void> emitDemo() async {
     await titan.emitDemo(count: 4);
     await refreshTitan();
@@ -101,6 +120,7 @@ class AppState extends ChangeNotifier {
     _liveSub?.cancel();
     titan.dispose();
     civint.dispose();
+    watchtower.dispose();
     super.dispose();
   }
 }
