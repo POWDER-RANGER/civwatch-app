@@ -61,13 +61,6 @@ class TitanApi {
     return TitanObservations.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
   }
 
-  Future<Map<String, dynamic>> emitDemo({int count = 4}) async {
-    final r = await _post('/api/telemetry/demo', query: {'count': '$count'});
-    if (r.statusCode == 401) throw Exception('unauthorized — set Titan API token in Settings');
-    if (r.statusCode != 200) throw Exception('demo ${r.statusCode}');
-    return jsonDecode(r.body) as Map<String, dynamic>;
-  }
-
   Future<Map<String, dynamic>> verifyEvidence() async {
     final r = await _get('/api/evidence/verify');
     if (r.statusCode != 200) throw Exception('verify ${r.statusCode}');
