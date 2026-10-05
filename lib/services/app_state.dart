@@ -32,6 +32,7 @@ class AppState extends ChangeNotifier {
   List<CivintAward> awards = [];
   List<AlprPoint> alpr = [];
   List<SurveillanceAsset> surveillance = [];
+  List<AtlasSurveillanceRecord> atlasSurveillance = [];
   List<Map<String, dynamic>> liveLog = [];
   String titanObservationState = 'unavailable';
   String titanOwnerScope = 'user_device';
@@ -96,6 +97,7 @@ class AppState extends ChangeNotifier {
       awards = await civint.awards();
       alpr = await civint.alpr();
       surveillance = await civint.surveillance();
+      atlasSurveillance = await civint.atlasSurveillance();
       civintError = null;
     } catch (e) {
       civintError = 'CIVINT feeds: $e';

@@ -46,6 +46,17 @@ class CivintApi {
         .toList();
   }
 
+  Future<List<AtlasSurveillanceRecord>> atlasSurveillance() async {
+    final r = await _client.get(_u('atlas_surveillance.json')).timeout(const Duration(seconds: 15));
+    if (r.statusCode != 200) return [];
+    final data = jsonDecode(r.body);
+    final raw = data is Map && data['records'] is List ? data['records'] as List : const [];
+    return raw
+        .whereType<Map>()
+        .map((e) => AtlasSurveillanceRecord.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
   Future<List<SurveillanceAsset>> surveillance() async {
     final r = await _client.get(_u('surveillance.json')).timeout(const Duration(seconds: 15));
     if (r.statusCode != 200) return [];
