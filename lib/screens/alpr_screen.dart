@@ -24,12 +24,18 @@ class AlprScreen extends StatelessWidget {
                 ),
               ),
             )
-          : ListView.builder(
+          : ListView(
               padding: const EdgeInsets.all(12),
-              itemCount: pts.length,
-              itemBuilder: (_, i) {
-                final p = pts[i];
-                return ListTile(
+              children: [
+                if (state.atlasSurveillance.isNotEmpty)
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.description_outlined),
+                      title: Text('${state.atlasSurveillance.length} public surveillance records'),
+                      subtitle: const Text('Atlas of Surveillance · jurisdiction/evidence layer'),
+                    ),
+                  ),
+                ...pts.map((p) => ListTile(
                   leading: Icon(
                     p.category == 'gunshot_detector' ? Icons.graphic_eq : Icons.camera_alt_outlined,
                     color: const Color(0xFFA371F7),
@@ -42,9 +48,9 @@ class AlprScreen extends StatelessWidget {
                     '${p.direction != null ? " · dir ${p.direction}" : ""}',
                     style: const TextStyle(fontSize: 12, color: Color(0xFF8B949E)),
                   ),
-                );
-              },
-            ),
+                )),
+              ],
+
     );
   }
 }
