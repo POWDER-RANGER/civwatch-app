@@ -13,7 +13,7 @@ class AlprScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0D1117),
       appBar: AppBar(backgroundColor: const Color(0xFF0D1117), title: const Text('ALPR / Surveillance')),
-      body: pts.isEmpty
+      body: pts.isEmpty && state.atlasSurveillance.isEmpty
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
@@ -35,22 +35,26 @@ class AlprScreen extends StatelessWidget {
                       subtitle: const Text('Atlas of Surveillance · jurisdiction/evidence layer'),
                     ),
                   ),
-                ...pts.map((p) => ListTile(
-                  leading: Icon(
-                    p.category == 'gunshot_detector' ? Icons.graphic_eq : Icons.camera_alt_outlined,
-                    color: const Color(0xFFA371F7),
+                ...pts.map(
+                  (p) => ListTile(
+                    leading: Icon(
+                      p.category == 'gunshot_detector'
+                          ? Icons.graphic_eq
+                          : Icons.camera_alt_outlined,
+                      color: const Color(0xFFA371F7),
+                    ),
+                    title: Text(p.label),
+                    subtitle: Text(
+                      '${p.category.replaceAll('_', ' ')} · ${p.lat.toStringAsFixed(5)}, ${p.lon.toStringAsFixed(5)}'
+                      '${p.operator != null ? " · ${p.operator}" : ""}'
+                      '${p.manufacturer != null ? " · ${p.manufacturer}" : ""}'
+                      '${p.direction != null ? " · dir ${p.direction}" : ""}',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF8B949E)),
+                    ),
                   ),
-                  title: Text(p.label),
-                  subtitle: Text(
-                    '${p.category.replaceAll('_', ' ')} · ${p.lat.toStringAsFixed(5)}, ${p.lon.toStringAsFixed(5)}'
-                    '${p.operator != null ? " · ${p.operator}" : ""}'
-                    '${p.manufacturer != null ? " · ${p.manufacturer}" : ""}'
-                    '${p.direction != null ? " · dir ${p.direction}" : ""}',
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF8B949E)),
-                  ),
-                )),
+                ),
               ],
-
+            );
     );
   }
 }
