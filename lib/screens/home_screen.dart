@@ -83,14 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 MetricTile(label: 'Alerts', value: '${state.alerts.length}'),
-                const SizedBox(width: 8),
                 MetricTile(label: 'Awards', value: '${state.awards.length}'),
-                const SizedBox(width: 8),
                 MetricTile(label: 'ALPR pts', value: '${state.alpr.length}'),
-                const SizedBox(width: 8),
                 MetricTile(label: 'Surv. assets', value: '${state.surveillance.length}'),
               ],
             ),
