@@ -132,6 +132,33 @@ class AlprPoint {
   }
 }
 
+class TitanObservations {
+  TitanObservations({
+    required this.state,
+    required this.ownerScope,
+    required this.samples,
+    required this.limitations,
+  });
+
+  final String state;
+  final String ownerScope;
+  final List<RfSample> samples;
+  final List<String> limitations;
+
+  factory TitanObservations.fromJson(Map<String, dynamic> j) {
+    final raw = (j['samples'] as List?) ?? const [];
+    return TitanObservations(
+      state: '${j['state'] ?? 'unavailable'}',
+      ownerScope: '${j['owner_scope'] ?? 'unknown'}',
+      samples: raw
+          .whereType<Map>()
+          .map((e) => RfSample.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
+      limitations: ((j['limitations'] as List?) ?? const []).map((e) => '$e').toList(),
+    );
+  }
+}
+
 class SurveillanceAsset {
   SurveillanceAsset({
     required this.id,
