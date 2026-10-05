@@ -19,17 +19,6 @@ class TitanScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () async {
-              await state.emitDemo();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Demo samples sealed into evidence chain')),
-                );
-              }
-            },
-            child: const Text('Demo'),
-          ),
-          TextButton(
-            onPressed: () async {
               final v = await state.verify();
               if (context.mounted) {
                 showDialog(
@@ -99,11 +88,10 @@ class TitanScreen extends StatelessWidget {
           const SizedBox(height: 16),
           const Text('Recent RF samples', style: TextStyle(fontWeight: FontWeight.w600)),
           ...state.samples.take(30).map((s) {
-            final demo = s.isDemo ? ' · demo' : '';
             return ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              title: Text('${s.domain}$demo', style: const TextStyle(fontSize: 14)),
+              title: Text(s.domain, style: const TextStyle(fontSize: 14)),
               subtitle: Text('${s.ts} · ${s.metrics}',
                   style: const TextStyle(fontSize: 11, color: Color(0xFF8B949E))),
             );

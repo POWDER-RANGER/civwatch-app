@@ -118,11 +118,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> emitDemo() async {
-    await titan.emitDemo(count: 4);
-    await refreshTitan();
-  }
-
   Future<Map<String, dynamic>> verify() => titan.verifyEvidence();
 
   @override

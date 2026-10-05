@@ -54,7 +54,6 @@ class RfSample {
         metrics: Map<String, dynamic>.from(j['metrics'] as Map? ?? {}),
       );
 
-  bool get isDemo => metrics['demo'] == true;
 }
 
 class CivintAlert {
