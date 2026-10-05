@@ -90,6 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 MetricTile(label: 'Awards', value: '${state.awards.length}'),
                 const SizedBox(width: 8),
                 MetricTile(label: 'ALPR pts', value: '${state.alpr.length}'),
+                const SizedBox(width: 8),
+                MetricTile(label: 'Surv. assets', value: '${state.surveillance.length}'),
               ],
             ),
             const SizedBox(height: 20),
@@ -118,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             DeskCard(
               title: 'Privacy',
-              subtitle: 'ALPR / surveillance points (OSM)',
+              subtitle: 'ALPR / cameras / sensors · OSM + CIVINT',
               icon: Icons.privacy_tip_outlined,
               color: const Color(0xFFA371F7),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AlprScreen())),
