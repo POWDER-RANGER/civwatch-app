@@ -132,6 +132,47 @@ class AlprPoint {
   }
 }
 
+class AtlasSurveillanceRecord {
+  AtlasSurveillanceRecord({
+    required this.id,
+    this.agency,
+    this.city,
+    this.county,
+    this.state,
+    this.technology,
+    this.vendor,
+    this.narrative,
+    this.sourceUrl,
+  });
+
+  final String id;
+  final String? agency;
+  final String? city;
+  final String? county;
+  final String? state;
+  final String? technology;
+  final String? vendor;
+  final String? narrative;
+  final String? sourceUrl;
+
+  factory AtlasSurveillanceRecord.fromJson(Map<String, dynamic> json) {
+    final p = (json['provenance'] as Map?) ?? {};
+    return AtlasSurveillanceRecord(
+      id: '${json['id'] ?? ''}',
+      agency: json['agency']?.toString(),
+      city: json['city']?.toString(),
+      county: json['county']?.toString(),
+      state: json['state']?.toString(),
+      technology: json['technology']?.toString(),
+      vendor: json['vendor']?.toString(),
+      narrative: json['narrative']?.toString(),
+      sourceUrl: p['source_url']?.toString(),
+    );
+  }
+
+  String get label => technology ?? 'Surveillance record';
+}
+
 class TitanObservations {
   TitanObservations({
     required this.state,
