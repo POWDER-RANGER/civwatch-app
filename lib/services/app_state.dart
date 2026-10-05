@@ -31,6 +31,7 @@ class AppState extends ChangeNotifier {
   List<CivintAlert> alerts = [];
   List<CivintAward> awards = [];
   List<AlprPoint> alpr = [];
+  List<SurveillanceAsset> surveillance = [];
   List<Map<String, dynamic>> liveLog = [];
   String? error;
   String? civintError;
@@ -87,6 +88,7 @@ class AppState extends ChangeNotifier {
       alerts = await civint.alerts();
       awards = await civint.awards();
       alpr = await civint.alpr();
+      surveillance = await civint.surveillance();
       civintError = null;
     } catch (e) {
       civintError = 'CIVINT feeds: $e';
