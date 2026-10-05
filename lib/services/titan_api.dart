@@ -53,6 +53,14 @@ class TitanApi {
     return list.map((e) => RfSample.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  Future<TitanObservations> observations({int n = 100, String? domain}) async {
+    final q = <String, String>{'n': '$n'};
+    if (domain != null) q['domain'] = domain;
+    final r = await _get('/api/observations?' + Uri(queryParameters: q).query);
+    if (r.statusCode != 200) throw Exception('observations ${r.statusCode}');
+    return TitanObservations.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
+  }
+
   Future<Map<String, dynamic>> emitDemo({int count = 4}) async {
     final r = await _post('/api/telemetry/demo', query: {'count': '$count'});
     if (r.statusCode == 401) throw Exception('unauthorized — set Titan API token in Settings');

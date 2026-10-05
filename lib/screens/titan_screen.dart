@@ -57,6 +57,23 @@ class TitanScreen extends StatelessWidget {
                 : 'v${h.version} · ${h.sensorId} · evidence ${h.evidenceOk ? "intact" : "BROKEN"} (${h.evidenceLength})',
             style: const TextStyle(color: Color(0xFF8B949E), fontSize: 12),
           ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Chip(label: Text('observations: ${state.titanObservationState}')),
+              Chip(label: Text('scope: ${state.titanOwnerScope}')),
+            ],
+          ),
+          if (state.titanLimitations.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                state.titanLimitations.first,
+                style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11),
+              ),
+            ),
           const SizedBox(height: 12),
           const Text('Live stream', style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),

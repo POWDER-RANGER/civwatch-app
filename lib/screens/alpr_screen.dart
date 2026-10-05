@@ -8,7 +8,8 @@ class AlprScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pts = context.watch<AppState>().alpr;
+    final state = context.watch<AppState>();
+    final pts = state.surveillance;
     return Scaffold(
       backgroundColor: const Color(0xFF0D1117),
       appBar: AppBar(backgroundColor: const Color(0xFF0D1117), title: const Text('ALPR / Surveillance')),
@@ -17,7 +18,7 @@ class AlprScreen extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'No ALPR points loaded.\nRun CIVINT OSM ingest and publish alpr_overpass.json, or set CIVINT base URL in Settings.',
+                  'No mapped surveillance observations loaded.\\nRun CIVINT OSM ingest and publish surveillance.json, or set the CIVINT base URL in Settings.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Color(0xFF8B949E)),
                 ),
@@ -29,10 +30,15 @@ class AlprScreen extends StatelessWidget {
               itemBuilder: (_, i) {
                 final p = pts[i];
                 return ListTile(
-                  leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFFA371F7)),
-                  title: Text(p.operator ?? 'ALPR node'),
+                  leading: Icon(
+                    p.category == 'gunshot_detector' ? Icons.graphic_eq : Icons.camera_alt_outlined,
+                    color: const Color(0xFFA371F7),
+                  ),
+                  title: Text(p.label),
                   subtitle: Text(
-                    '${p.lat.toStringAsFixed(5)}, ${p.lon.toStringAsFixed(5)}'
+                    '${p.category.replaceAll('_', ' ')} · ${p.lat.toStringAsFixed(5)}, ${p.lon.toStringAsFixed(5)}'
+                    '${p.operator != null ? " · ${p.operator}" : ""}'
+                    '${p.manufacturer != null ? " · ${p.manufacturer}" : ""}'
                     '${p.direction != null ? " · dir ${p.direction}" : ""}',
                     style: const TextStyle(fontSize: 12, color: Color(0xFF8B949E)),
                   ),
