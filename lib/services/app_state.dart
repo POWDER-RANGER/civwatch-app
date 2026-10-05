@@ -33,6 +33,9 @@ class AppState extends ChangeNotifier {
   List<AlprPoint> alpr = [];
   List<SurveillanceAsset> surveillance = [];
   List<Map<String, dynamic>> liveLog = [];
+  String titanObservationState = 'unavailable';
+  String titanOwnerScope = 'user_device';
+  List<String> titanLimitations = [];
   String? error;
   String? civintError;
   bool loading = false;
@@ -73,7 +76,11 @@ class AppState extends ChangeNotifier {
   Future<void> refreshTitan() async {
     try {
       health = await titan.health();
-      samples = await titan.recent(n: 50);
+      final observations = await titan.observations(n: 50);
+      samples = observations.samples;
+      titanObservationState = observations.state;
+      titanOwnerScope = observations.ownerScope;
+      titanLimitations = observations.limitations;
       evidence = await titan.evidenceTail(n: 15);
       error = null;
     } catch (e) {
