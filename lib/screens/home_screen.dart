@@ -74,12 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             Row(
               children: [
-                MetricTile(label: 'Titan', value: h?.status ?? '—', ok: h?.status == 'ok'),
+                Expanded(child: MetricTile(label: 'Titan', value: h?.status ?? '—', ok: h?.status == 'ok')),
                 const SizedBox(width: 8),
-                MetricTile(
-                    label: 'Evidence', value: h == null ? '—' : '${h.evidenceLength}', ok: h?.evidenceOk),
+                Expanded(
+                  child: MetricTile(
+                      label: 'Evidence', value: h == null ? '—' : '${h.evidenceLength}', ok: h?.evidenceOk),
+                ),
                 const SizedBox(width: 8),
-                MetricTile(label: 'Watchtower', value: w?.status ?? '—', ok: w?.status == 'ok'),
+                Expanded(child: MetricTile(label: 'Watchtower', value: w?.status ?? '—', ok: w?.status == 'ok')),
               ],
             ),
             const SizedBox(height: 8),
@@ -87,10 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                MetricTile(label: 'Alerts', value: '${state.alerts.length}'),
-                MetricTile(label: 'Awards', value: '${state.awards.length}'),
-                MetricTile(label: 'ALPR pts', value: '${state.alpr.length}'),
-                MetricTile(label: 'Surv. assets', value: '${state.surveillance.length}'),
+                MetricTile(label: 'Alerts', value: '${state.alerts.length}', minWidth: 96),
+                MetricTile(label: 'Awards', value: '${state.awards.length}', minWidth: 96),
+                MetricTile(label: 'ALPR pts', value: '${state.alpr.length}', minWidth: 96),
+                MetricTile(label: 'Surv. assets', value: '${state.surveillance.length}', minWidth: 96),
               ],
             ),
             const SizedBox(height: 20),
