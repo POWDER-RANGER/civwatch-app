@@ -28,13 +28,6 @@ class TitanApi {
   Future<http.Response> _get(String path) =>
       _client.get(_u(path), headers: AppSettings.instance.authHeaders()).timeout(const Duration(seconds: 10));
 
-  Future<http.Response> _post(String path, {Map<String, String>? query}) {
-    final uri = _u(path).replace(queryParameters: query);
-    return _client
-        .post(uri, headers: AppSettings.instance.authHeaders())
-        .timeout(const Duration(seconds: 12));
-  }
-
   Future<TitanHealth> health() async {
     final r = await _get('/api/health');
     if (r.statusCode != 200) throw Exception('health ${r.statusCode}');
@@ -56,7 +49,7 @@ class TitanApi {
   Future<TitanObservations> observations({int n = 100, String? domain}) async {
     final q = <String, String>{'n': '$n'};
     if (domain != null) q['domain'] = domain;
-    final r = await _get('/api/observations?' + Uri(queryParameters: q).query);
+    final r = await _get('/api/observations?${Uri(queryParameters: q).query}');
     if (r.statusCode != 200) throw Exception('observations ${r.statusCode}');
     return TitanObservations.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
   }

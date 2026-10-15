@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   analyze-test:
@@ -16,15 +17,13 @@ jobs:
         with:
           channel: stable
           cache: true
+      # The committed AndroidManifest.xml is a stub (no <activity>); flutter create
+      # will not overwrite it, so remove it and let Flutter generate the real one.
+      - name: Remove stub Android manifest
+        run: rm -f android/app/src/main/AndroidManifest.xml
       - run: flutter create . --project-name civwatch_app --platforms=android,ios,linux,windows,macos
       - name: Wire Android network security config
-        run: |
-          mkdir -p android/app/src/main/res/xml
-          if ! grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml; then
-            sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/' android/app/src/main/AndroidManifest.xml
-          fi
-          grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml
-          grep -q 'activity' android/app/src/main/AndroidManifest.xml
+        run: bash tool/wire_android.sh
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
@@ -56,13 +55,11 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Remove stub Android manifest
+        run: rm -f android/app/src/main/AndroidManifest.xml
       - run: flutter create . --project-name civwatch_app --platforms=android
       - name: Wire cleartext policy
-        run: |
-          if ! grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml; then
-            sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/' android/app/src/main/AndroidManifest.xml
-          fi
-          grep -q 'activity' android/app/src/main/AndroidManifest.xml
+        run: bash tool/wire_android.sh
       - run: flutter pub get
       - run: flutter build apk --release
 
