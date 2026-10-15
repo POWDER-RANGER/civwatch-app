@@ -105,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             DeskCard(
               title: 'Watchtower',
-              subtitle: 'Map oversight · ' + state.watchtowerFeatures.toString() + ' features',
+              subtitle: 'Map oversight · ${state.watchtowerFeatures} features',
               icon: Icons.map_outlined,
               color: const Color(0xFF58A6FF),
               onTap: () => _openWatchtower(context, state),
@@ -157,10 +157,10 @@ class _HomeScreenState extends State<HomeScreen> {
         content: Text(
           state.watchtowerHealth == null
               ? (state.watchtowerError ?? 'Watchtower is not configured.')
-              : 'Status: ' + state.watchtowerHealth!.status + '\n'
-                'Database: ' + state.watchtowerHealth!.db + '\n'
-                'Version: ' + state.watchtowerHealth!.version + '\n'
-                'Map features: ' + state.watchtowerFeatures.toString(),
+              : 'Status: ${state.watchtowerHealth!.status}\n'
+                'Database: ${state.watchtowerHealth!.db}\n'
+                'Version: ${state.watchtowerHealth!.version}\n'
+                'Map features: ${state.watchtowerFeatures}',
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
