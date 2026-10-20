@@ -80,6 +80,10 @@ See the [cross-repo integration contract](https://github.com/POWDER-RANGER/Civil
 - [Cell Titan](https://github.com/POWDER-RANGER/civwatch-cell-titan)
 - [CIVWATCH](https://github.com/POWDER-RANGER/CIVWATCH)
 
+## Documentation standard
+
+Follow the [CIVWATCH Documentation Standard](https://github.com/POWDER-RANGER/CivilianIntelligence/blob/main/docs/DOCUMENTATION_STANDARD.md) for attribution, generated artifacts, historical-status wording, and source/licence provenance.
+
 ## License
 
 MIT
