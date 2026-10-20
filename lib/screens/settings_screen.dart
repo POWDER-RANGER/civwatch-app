@@ -80,16 +80,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 20),
           FilledButton(
             onPressed: () async {
+              final appState = context.read<AppState>();
               await AppSettings.instance.save(
                 titan: _titan.text,
                 civint: _civint.text,
                 watchtower: _watchtower.text,
                 token: _token.text,
               );
-              if (context.mounted) {
-                await context.read<AppState>().bootstrap();
-                Navigator.pop(context);
-              }
+              if (!context.mounted) return;
+              await appState.bootstrap();
+              if (!context.mounted) return;
+              Navigator.pop(context);
             },
             child: const Text('Save & reconnect'),
           ),

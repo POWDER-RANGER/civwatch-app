@@ -54,7 +54,7 @@ class AlprScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            );
+            ),
     );
   }
 }

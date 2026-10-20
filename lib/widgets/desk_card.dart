@@ -62,34 +62,37 @@ class DeskCard extends StatelessWidget {
 }
 
 class MetricTile extends StatelessWidget {
-  const MetricTile({super.key, required this.label, required this.value, this.ok});
+  const MetricTile({super.key, required this.label, required this.value, this.ok, this.minWidth});
 
   final String label;
   final String value;
   final bool? ok;
+
+  /// Minimum tile width; use when the tile sits in a Wrap. In a Row, wrap the
+  /// tile in Expanded at the call site (Expanded cannot be a Wrap child).
+  final double? minWidth;
 
   @override
   Widget build(BuildContext context) {
     final color = ok == null
         ? const Color(0xFF00E5FF)
         : (ok! ? const Color(0xFF3FB950) : const Color(0xFFD29922));
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF161B22),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF30363D)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label.toUpperCase(),
-                style: const TextStyle(fontSize: 10, letterSpacing: 1.2, color: Color(0xFF8B949E))),
-            const SizedBox(height: 6),
-            Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
-          ],
-        ),
+    return Container(
+      constraints: minWidth == null ? null : BoxConstraints(minWidth: minWidth!),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF161B22),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF30363D)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label.toUpperCase(),
+              style: const TextStyle(fontSize: 10, letterSpacing: 1.2, color: Color(0xFF8B949E))),
+          const SizedBox(height: 6),
+          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
+        ],
       ),
     );
   }

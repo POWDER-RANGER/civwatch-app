@@ -1,4 +1,4 @@
-/// Shared domain models for CIVWATCH client.
+// Shared domain models for CIVWATCH client.
 
 class TitanHealth {
   TitanHealth({
